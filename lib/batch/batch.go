@@ -18,7 +18,6 @@ func getBatch(n int64, pool int64) (res []user) {
 	var ch = make(chan int, pool)
 	var wg sync.WaitGroup
 	var mu sync.Mutex
-	var users []user
 	var i int64
 	for i = 0; i < n; i++ {
 		wg.Add(1)
@@ -28,10 +27,10 @@ func getBatch(n int64, pool int64) (res []user) {
 			defer mu.Unlock()
 			itemUser := getOne(j)
 			mu.Lock()
-			users = append(users, itemUser)
+			res = append(res, itemUser)
 			<-ch
 		}(i)
 	}
 	wg.Wait()
-	return users
+	return res
 }
