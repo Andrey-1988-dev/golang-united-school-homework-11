@@ -15,20 +15,20 @@ func getOne(id int64) user {
 }
 
 func getBatch(n int64, pool int64) (res []user) {
-	var ch = make(chan int, pool)
+	var ch = make(chan struct{}, pool)
 	var wg sync.WaitGroup
 	var mu sync.Mutex
 	var i int64
 	for i = 0; i < n; i++ {
 		wg.Add(1)
-		ch <- 1
+		ch <- struct{}{}
 		go func(j int64) {
-			defer wg.Done()
-			defer mu.Unlock()
 			itemUser := getOne(j)
 			mu.Lock()
 			res = append(res, itemUser)
+			mu.Unlock()
 			<-ch
+			wg.Done()
 		}(i)
 	}
 	wg.Wait()
